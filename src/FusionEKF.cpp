@@ -42,23 +42,16 @@ FusionEKF::FusionEKF() {
   // initialization of kalman filter instance
   VectorXd x = VectorXd::Zero(4);  // the mix of position and velocity
   MatrixXd P = MatrixXd::Identity(4, 4);  // the state covariance
+  P(2,2) = P(3,3) = 1000;
+
   MatrixXd F = MatrixXd::Identity(4, 4);  // the state transition function
   // we set delta_t to 1 initially
-  F(0, 2) = 1.0;
-  F(1, 3) = 1.0;
-  MatrixXd Q = MatrixXd::Zero(4, 4); // TODO: I think this step should go in the Tracking constructor
+  F(0, 2) = F(1, 3) = 1.0;
+
+  MatrixXd Q = MatrixXd::Zero(4, 4);  // the process covariance
 
   // then pass it all to the kalman filter
   ekf_.Init(x, P, F, H_laser_, R_laser_, Q);
-
-  // measurement function matrix (Jacobian) - radar
-  //Hj_ = tools.CalculateJacobian(ekf_.x_);
-
-  /**
-  TODO:
-    * Finish initializing the FusionEKF.
-    * Set the process and measurement noises
-  */
 
 }
 
@@ -69,19 +62,13 @@ FusionEKF::~FusionEKF() {}
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
-  double dt = (measurement_pack.timestamp_ - previous_timestamp_)/1000.;
+  double dt = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.;
   previous_timestamp_ = measurement_pack.timestamp_;
 
   /*****************************************************************************
    *  Initialization
    ****************************************************************************/
   if (!is_initialized_) {
-    /**
-    TODO:
-      * Initialize the state ekf_.x_ with the first measurement.
-      * Create the covariance matrix.
-      * Remember: you'll need to convert radar from polar to cartesian coordinates.
-    */
     // first measurement
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
@@ -91,20 +78,20 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
-      double ro = measurement_pack.raw_measurements_[0];
-      double theta = measurement_pack.raw_measurements_[1];
-      double ro_dot = measurement_pack.raw_measurements_[2];
-      double theta_cos = cos(theta);
-      double theta_sin = sin(theta);
-      //ekf_.x_ << ro * theta_cos, ro * theta_sin, ro_dot * theta_cos, ro_dot * theta_sin;
-      ekf_.x_ << ro * theta_cos, ro * theta_sin, 0, 0;
+      double ro = measurement_pack.raw_measurements_(0);
+      double phi = measurement_pack.raw_measurements_(1);
+      double ro_dot = measurement_pack.raw_measurements_(2);
+      double phi_cos = cos(phi);
+      double phi_sin = sin(phi);
+      // The lectures say we shouldn't use ro_dot to initialize velocity.
+      ekf_.x_ << ro * phi_cos, ro * phi_sin, 0, 0;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
       Initialize state.
       */
-      ekf_.x_ << measurement_pack.raw_measurements_[0],
-                 measurement_pack.raw_measurements_[1],
+      ekf_.x_ << measurement_pack.raw_measurements_(0),
+                 measurement_pack.raw_measurements_(1),
                  0,
                  0;
     }
@@ -120,8 +107,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   ekf_.F_(0, 2) = ekf_.F_(1, 3) = dt;
 
-  const float noise_ax = 9;
-  const float noise_ay = 9;
+  const float noise_ax = 9.F;
+  const float noise_ay = 9.F;
 
   double dt_4_by_4 = pow(dt, 4.0)/4.0;
   double dt_3_by_2 = pow(dt, 3.0)/2.0;
@@ -136,12 +123,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   /*****************************************************************************
    *  Update
    ****************************************************************************/
-
-  /**
-   TODO:
-     * Use the sensor type to perform the update step.
-     * Update the state and covariance matrices.
-   */
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates

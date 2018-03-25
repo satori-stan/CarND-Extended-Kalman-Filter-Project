@@ -64,6 +64,9 @@ public:
    */
   void UpdateEKF(const Eigen::VectorXd &z);
 
+ private:
+  // Identity matrix the size of x_
+  Eigen::MatrixXd I_;
 };
 
 #endif /* KALMAN_FILTER_H_ */
