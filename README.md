@@ -23,15 +23,15 @@ A successful implementation requires:
 
 The starter code provided for the project was already meant to compile correctly in Linux, Mac and Windows; although compilation in Windows required installing Windows 10 Bash on Ubuntu or using Docker to create a virtual environment.
 
-Since my current platform is Windows but I have low resources, I decided to go for a native approach to avoid the installation of such resource-intensive environments. This decision had a non-trivial time cost, which I intend to contribute to the Nanodegree Program for others in my position. There is little in the repository that will give my choice away, exept for a couple of lines at the end of the CMakeLists.txt file where the names of the libraries are redefined when a Windows environment is found.
+Since my current platform is Windows but I have low resources, I decided to go for a native approach to avoid the installation of such resource-intensive environments. This decision had a non-trivial time cost, which I intend to contribute to the Nanodegree Program for others in my position. There is little in the repository that will give my choice away, except for a couple of lines at the end of the CMakeLists.txt file where the names of the libraries are redefined when a Windows environment is found.
 
-The main program file (main.cpp) was modified slightly to accomodate api changes in uWS 0.14.4. This file receives a measurement package message from the simulator and passes it to the FusionEKF class, where the information is processed.
+The main program file (main.cpp) was modified slightly to accommodate api changes in uWS 0.14.4. This file receives a measurement package message from the simulator and passes it to the FusionEKF class, where the information is processed.
 
 #### 2. Follow the process of a 2 dimensional Kalman Filter
 
 The process is contained in the FusionEKF::ProcessMeasurement function implemented in the FusionEKF.cpp file. The handling of the initial measurement is done in lines 71-97, followed by a prediction step (lines 108-121) and an update step (127-138). The equations of the Kalman Filter are implemented in the KalmanFilter class' (kalman_filter.{h,cpp}) Update and Predict methods, although some of the necessary values are set from the calling ProcessMeasurement method as well as the initialization of the FusionEKF class.
 
-The initialization of the FusionEKF class for example, sets the Radar and Lidar covariance matrices (which in theory are provided by the device manufacturers) and some sensible default values in prepraration of the new measurements. In particular, the state covariance positions (2,2) and (3,3) for the speed covariances were set to 1000 to help it converge faster according to observations after several runs.
+The initialization of the FusionEKF class for example, sets the Radar and Lidar covariance matrices (which in theory are provided by the device manufacturers) and some sensible default values in preparation of the new measurements. In particular, the state covariance positions (2,2) and (3,3) for the speed covariances were set to 1000 to help it converge faster according to observations after several runs.
 
 #### 3. Handles first measurements appropriately
 
@@ -43,9 +43,9 @@ So the code first calculates delta t and stores the last measurement's timestamp
 
 #### 4. Handles radar measurements via the Extended Kalman Filter approximation
 
-From the FusionEKF class, little can be seen about the Exended Kalman Filter except for the fact that if the sensor type is radar, an additional function call is made to calculate a Jacobian and the function to update is `UpdateEKF` instead of the normal `Update` for laser.
+From the FusionEKF class, little can be seen about the Extended Kalman Filter except for the fact that if the sensor type is radar, an additional function call is made to calculate a Jacobian and the function to update is `UpdateEKF` instead of the normal `Update` for laser.
 
-A Jacobian is a method to linearly approximate a function using it's first order derivative. It is a simplification of a Taylor Series Expansion and it is required because:
+A Jacobian is a method to linearly approximate a function using its first order derivative. It is a simplification of a Taylor Series Expansion and it is required because:
 
 1. We use a non-linear function to map the state's belief into the measurement space
 2. Using a non-linear function to map our Gaussian probability distribution would yield a non-Gaussian distribution that would break the Kalman Filter.
@@ -54,7 +54,7 @@ The Jacobian is calculated in the Tools (tools.cpp) class. It requires passing t
 
 ![state projection function from cartesian to polar coordinates][image1]
 
-The differences between regular Kalman Filter and Extended Kalman Filter become more evident when comparing the update methods from the KalmanFilter class. In the UpdateEKF method, the first step is to map the current state's belief (in cartesian coordinates) to the measurement space (in polar coordinates). The Kalman Filter equations can then be applied to get the updated predicion.
+The differences between regular Kalman Filter and Extended Kalman Filter become more evident when comparing the update methods from the KalmanFilter class. In the UpdateEKF method, the first step is to map the current state's belief (in cartesian coordinates) to the measurement space (in polar coordinates). The Kalman Filter equations can then be applied to get the updated prediction.
 
 A critical step in the extended Kalman Filter (or any involving polar coordinates really) is normalizing the angles. In the code this is achieved efficiently by using a combination of trigonometrical functions that can be seen in lines 47 and 55 of kalman_filter.cpp.
 
@@ -128,3 +128,4 @@ OUTPUT: values provided by the c++ program to the simulator
 3. Compile: `cmake .. && make` 
    * On windows, you may need to run: `cmake .. -G "Unix Makefiles" && make`
 4. Run it: `./ExtendedKF `
+
