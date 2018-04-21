@@ -56,6 +56,8 @@ The Jacobian is calculated in the Tools (tools.cpp) class. It requires passing t
 
 The differences between regular Kalman Filter and Extended Kalman Filter become more evident when comparing the update methods from the KalmanFilter class. In the UpdateEKF method, the first step is to map the current state's belief (in cartesian coordinates) to the measurement space (in polar coordinates). The Kalman Filter equations can then be applied to get the updated predicion.
 
+A critical step in the extended Kalman Filter (or any involving polar coordinates really) is normalizing the angles. In the code this is achieved efficiently by using a combination of trigonometrical functions that can be seen in lines 47 and 55 of kalman_filter.cpp.
+
 #### 5. Obtain low RMSE values
 
 Using the simulator, RMSE values obtained after a complete run were below the maximums allowed ([.11, .11, 0.52, 0.52]).
