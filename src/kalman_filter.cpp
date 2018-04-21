@@ -52,7 +52,9 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
     VectorXd y = z - z_pred;  // y = z − h(x')
     double angle = y(1);
-    y(1) = atan2(sin(angle), cos(angle));  // Normalize
+    // Normalize (from a hint by fernandodamasio 
+    // https://discussions.udacity.com/t/already-used-atan2-to-calculate-phi-in-hx-do-i-still-need-to-normalize-the-phi-in-y/242332/7)
+    y(1) = atan2(sin(angle), cos(angle));
     MatrixXd PHt = P_ * H_.transpose();
     MatrixXd S = H_ * PHt + R_;  // S = H P' H^T + R
     MatrixXd K = PHt * S.inverse();  // K = P' H^T S^−1
